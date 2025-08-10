@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Form</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-orange-50 min-h-screen flex items-center justify-center p-4">
+  <form id="form" action="" method="post"
+    class="bg-white shadow-lg rounded-lg p-6 w-full max-w-md space-y-4 border border-orange-200">
+
+    <h1 class="text-2xl font-bold text-orange-700 text-center">แบบฟอร์มสุขภาพ</h1>
+
+    <div>
+      <label for="age" class="block font-medium text-orange-700">อายุ</label>
+      <input type="number" id="age" placeholder="อายุ" required
+        class="border border-orange-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500" />
+      <span id="ageerror" class="text-red-500 text-sm"></span>
+    </div>
+
+    <div>
+      <label class="block font-medium text-orange-700">เพศ</label>
+      <div class="space-x-2 text-orange-700">
+        <input type="radio" id="male" name="gender" value="male" required />
+        <label for="male">ชาย</label>
+        <input type="radio" id="female" name="gender" value="female" />
+        <label for="female">หญิง</label>
+        <input type="radio" id="other" name="gender" value="LGBTQ+" />
+        <label for="other">LGBTQ+</label>
+      </div>
+    </div>
+
+    <div>
+      <label for="weight" class="block font-medium text-orange-700">น้ำหนัก (กก.)</label>
+      <input type="number" id="weight" placeholder="น้ำหนัก" required
+        class="border border-orange-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500" />
+      <span id="weighterror" class="text-red-500 text-sm"></span>
+    </div>
+
+    <div>
+      <label for="height" class="block font-medium text-orange-700">ส่วนสูง (ซม.)</label>
+      <input type="number" id="height" placeholder="ส่วนสูง" required
+        class="border border-orange-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500" />
+      <span id="heighterror" class="text-red-500 text-sm"></span>
+    </div>
+
+    <div>
+      <label class="block font-medium text-orange-700">โรคประจำตัว</label>
+      <div class="space-x-2 text-orange-700">
+        <input type="radio" name="chronic" value="yes" required />
+        <label>มี</label>
+        <input type="radio" name="chronic" value="no" />
+        <label>ไม่มี</label>
+      </div>
+      <textarea id="disease-details"
+        class="hidden border border-orange-300 rounded px-3 py-2 mt-2 w-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+        placeholder="ระบุรายละเอียดโรคประจำตัว"></textarea>
+      <span id="diseaseerror" class="text-red-500 text-sm"></span>
+    </div>
+
+    <button type="submit"
+      class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded w-full font-semibold transition">ส่งข้อมูล</button>
+  </form>
+
+  <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+    <div class="bg-white p-6 rounded shadow-md max-w-sm w-full text-center border border-orange-200">
+      <p id="modal-message" class="text-orange-700 font-medium"></p>
+      <button id="close-modal" class="mt-4 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded">ปิด</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('form');
+    const age = document.getElementById('age');
+    const weight = document.getElementById('weight');
+    const height = document.getElementById('height');
+    const chronicRadios = document.querySelectorAll('input[name="chronic"]');
+    const diseaseDetails = document.getElementById('disease-details');
+
+    const ageError = document.getElementById('ageerror');
+    const weightError = document.getElementById('weighterror');
+    const heightError = document.getElementById('heighterror');
+    const diseaseError = document.getElementById('diseaseerror');
+
+    const modal = document.getElementById('modal');
+    const modalMessage = document.getElementById('modal-message');
+    const closeModal = document.getElementById('close-modal');
+
+    chronicRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.value === 'yes') {
+          diseaseDetails.classList.remove('hidden');
+        } else {
+          diseaseDetails.classList.add('hidden');
+          diseaseDetails.value = "";
+        }
+      });
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      ageError.textContent = "";
+      weightError.textContent = "";
+      heightError.textContent = "";
+      diseaseError.textContent = "";
+
+      if (age.value < 15 || age.value > 60) {
+        ageError.textContent = "อายุต้องอยู่ระหว่าง 15-60 ปี";
+        return;
+      }
+      if (weight.value <= 0) {
+        weightError.textContent = "น้ำหนักต้องเป็นค่าบวก";
+        return;
+      }
+      if (height.value <= 0) {
+        heightError.textContent = "ส่วนสูงต้องเป็นค่าบวก";
+        return;
+      }
+
+      let chronicVal = document.querySelector('input[name="chronic"]:checked');
+      if (!chronicVal) {
+        diseaseError.textContent = "กรุณาเลือกว่ามีโรคประจำตัวหรือไม่";
+        return;
+      }
+      if (chronicVal.value === 'yes' && diseaseDetails.value.trim() === "") {
+        diseaseError.textContent = "กรุณาระบุรายละเอียดโรคประจำตัว";
+        return;
+      }
+
+      let bmi = weight.value / Math.pow((height.value / 100), 2);
+      let category = "";
+      let colorClass = "";
+
+      if (bmi < 18.5) {
+        category = "น้ำหนักน้อยหรือผอม";
+        colorClass = "text-blue-600"; 
+      } else if (bmi < 23) {
+        category = "ปกติ";
+        colorClass = "text-green-600"; 
+      } else if (bmi < 25) {
+        category = "น้ำหนักเกิน";
+        colorClass = "text-orange-600"; 
+      } else if (bmi < 30) {
+        category = "โรคอ้วนระดับที่ 1";
+        colorClass = "text-red-600"; 
+      } else {
+        category = "โรคอ้วนระดับที่ 2";
+        colorClass = "text-red-800";
+      }
+
+      modalMessage.className = "font-medium";
+
+    
+      modalMessage.classList.add(colorClass);
+
+      modalMessage.textContent = `BMI ของคุณคือ ${bmi.toFixed(2)} (${category})`;
+      modal.classList.remove('hidden');
+    });
+
+    closeModal.addEventListener('click', () => {
+      modal.classList.add('hidden');
+    });
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) {
+        modal.classList.add("hidden");
+      }
+    });
+  </script>
+</body>
+
+</html>

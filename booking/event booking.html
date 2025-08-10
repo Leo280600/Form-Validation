@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จองบัตรกิจกรรม</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-blue-50 min-h-screen flex items-center justify-center p-4">
+
+    <form action="" method="post" id="form" class="bg-white shadow-lg rounded-lg p-6 w-full max-w-md space-y-4">
+        <h1 class="text-2xl font-bold text-blue-600 text-center">จองตั๋วกิจกรรม</h1>
+
+        <div>
+            <label for="name" class="block font-medium text-blue-700">ชื่อ-นามสกุล</label>
+            <input type="text" id="name" placeholder="ชื่อ-นามสกุล" required
+                class="border border-blue-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <span id="nameerror" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label for="phone" class="block font-medium text-blue-700">เบอร์โทรศัพท์</label>
+            <input type="tel" id="phone" placeholder="เบอร์โทรศัพท์" required
+                class="border border-blue-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <span id="phoneerror" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label for="ticket" class="block font-medium text-blue-700">ประเภทบัตร</label>
+            <select id="ticket" name="ticket" required
+                class="border border-blue-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="" disabled selected>เลือกประเภทบัตร</option>
+                <option value="Normal">ปกติ</option>
+                <option value="VIP">VIP</option>
+                <option value="Premium">Premium</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="quantity" class="block font-medium text-blue-700">จำนวนบัตร</label>
+            <input type="number" id="quantity" placeholder="จำนวนบัตร" min="1" max="5" step="1" required
+                class="border border-blue-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <span id="quantityerror" class="text-red-500 text-sm"></span>
+        </div>
+
+        <input type="submit" value="จองบัตร"
+            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-full transition-colors">
+    </form>
+
+    <!-- Modal -->
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm text-center">
+            <h2 class="text-xl font-bold text-blue-600 mb-2">จองตั๋วสำเร็จ</h2>
+            <p id="modal-message" class="mb-4 text-gray-700"></p>
+            <button id="close-modal" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">ปิด</button>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('form');
+        const nameInput = document.getElementById('name');
+        const phoneInput = document.getElementById('phone');
+        const ticket = document.getElementById('ticket');
+        const quantity = document.getElementById('quantity');
+
+        const nameError = document.getElementById('nameerror');
+        const phoneError = document.getElementById('phoneerror');
+        const quantityError = document.getElementById('quantityerror');
+
+        const modal = document.getElementById('modal');
+        const modalMessage = document.getElementById('modal-message');
+        const closeModal = document.getElementById('close-modal');
+
+        ticket.addEventListener('change', function () {
+            if (ticket.value === 'VIP' || ticket.value === 'Premium') {
+                quantity.max = 2;
+                if (Number(quantity.value) > 2) quantity.value = 2;
+            } else {
+                quantity.max = 5;
+            }
+        });
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            nameError.textContent = "";
+            phoneError.textContent = "";
+            quantityError.textContent = "";
+
+            if (nameInput.value.trim().length < 2) {
+                nameError.textContent = "กรุณากรอกชื่ออย่างน้อย 2 ตัวอักษร";
+                return;
+            }
+            if (!/^(0)\d{9}$/.test(phoneInput.value.trim())) {
+                phoneError.textContent = "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง";
+                return;
+            }
+            if (!ticket.value) {
+                quantityError.textContent = "กรุณาเลือกประเภทบัตร";
+                return;
+            }
+            const qty = Number(quantity.value);
+            const maxQty = Number(quantity.max);
+            if (qty < 1 || qty > maxQty) {
+                quantityError.textContent = `จำนวนบัตรต้องอยู่ระหว่าง 1 - ${maxQty}`;
+                return;
+            }
+
+            modalMessage.textContent = `จองตั๋วสำเร็จ จำนวน: ${quantity.value} ประเภท: ${ticket.value}`;
+            modal.classList.remove("hidden");
+            form.reset();
+        });
+
+        closeModal.addEventListener("click", function () {
+            modal.classList.add("hidden");
+        });
+        modal.addEventListener("click", function (e) {
+            if (e.target === modal) {
+                modal.classList.add("hidden");
+            }
+        });
+
+
+
+    </script>
+</body>
+
+</html>
